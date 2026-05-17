@@ -1,0 +1,138 @@
+syntax = "proto3";
+
+package proto;
+option go_package = "food-delivery/proto";
+
+service OrderService {
+    rpc CreateOrder(CreateOrderRequest) returns (OrderResponse);
+    rpc GetOrder(GetOrderRequest) returns (OrderResponse);
+    rpc UpdateOrder(UpdateOrderRequest) returns (OrderResponse);
+    rpc DeleteOrder(DeleteOrderRequest) returns (DeleteOrderResponse);
+    rpc ListOrders(ListOrdersRequest) returns (ListOrdersResponse);
+    rpc UpdateOrderStatus(UpdateOrderStatusRequest) returns (OrderResponse);
+    rpc CancelOrder(CancelOrderRequest) returns (OrderResponse);
+    rpc ProcessPayment(ProcessPaymentRequest) returns (PaymentResponse);
+    rpc GetPaymentStatus(GetPaymentStatusRequest) returns (PaymentStatusResponse);
+    rpc TrackDelivery(TrackDeliveryRequest) returns (DeliveryStatusResponse);
+    rpc UpdateDeliveryStatus(UpdateDeliveryStatusRequest) returns (DeliveryStatusResponse);
+    rpc ApplyDiscount(ApplyDiscountRequest) returns (OrderResponse);
+    rpc GetOrderHistory(GetOrderHistoryRequest) returns (OrderHistoryResponse);
+}
+
+message CreateOrderRequest {
+    string user_id = 1;
+    string restaurant_id = 2;
+    repeated OrderItem items = 3;
+}
+
+message GetOrderRequest {
+    string order_id = 1;
+}
+
+message UpdateOrderRequest {
+    string order_id = 1;
+    repeated OrderItem items = 2;
+}
+
+message DeleteOrderRequest {
+    string order_id = 1;
+}
+
+message DeleteOrderResponse {
+    bool success = 1;
+    string message = 2;
+}
+
+message ListOrdersRequest {
+    string user_id = 1;
+    int32 page = 2;
+    int32 page_size = 3;
+}
+
+message ListOrdersResponse {
+    repeated Order orders = 1;
+    int32 total = 2;
+}
+
+message UpdateOrderStatusRequest {
+    string order_id = 1;
+    string status = 2;
+}
+
+message CancelOrderRequest {
+    string order_id = 1;
+    string reason = 2;
+}
+
+message ProcessPaymentRequest {
+    string order_id = 1;
+    double amount = 2;
+    string payment_method = 3;
+}
+
+message PaymentResponse {
+    string payment_id = 1;
+    string status = 2;
+    string message = 3;
+}
+
+message GetPaymentStatusRequest {
+    string order_id = 1;
+}
+
+message PaymentStatusResponse {
+    string order_id = 1;
+    string status = 2;
+    double amount = 3;
+}
+
+message TrackDeliveryRequest {
+    string order_id = 1;
+}
+
+message DeliveryStatusResponse {
+    string order_id = 1;
+    string status = 2;
+    string courier_name = 3;
+    string courier_phone = 4;
+    int32 estimated_minutes = 5;
+}
+
+message UpdateDeliveryStatusRequest {
+    string order_id = 1;
+    string status = 2;
+    string location = 3;
+}
+
+message ApplyDiscountRequest {
+    string order_id = 1;
+    string discount_code = 2;
+}
+
+message GetOrderHistoryRequest {
+    string user_id = 1;
+    int32 limit = 2;
+}
+
+message OrderHistoryResponse {
+    repeated Order orders = 1;
+    int32 total_orders = 2;
+    double total_spent = 3;
+}
+
+message OrderItem {
+    string menu_item_id = 1;
+    string name = 2;
+    int32 quantity = 3;
+    double price = 4;
+}
+
+message Order {
+    string id = 1;
+    string user_id = 2;
+    string restaurant_id = 3;
+    repeated OrderItem items = 4;
+    string status = 5;
+    double total = 6;
+    string created_at = 7;
+}

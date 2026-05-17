@@ -1,0 +1,195 @@
+syntax = "proto3";
+
+package fooddelivery;
+
+option go_package = "github.com/alisher/food-delivery/proto;proto";
+
+message User {
+  string id = 1;
+  string email = 2;
+  string name = 3;
+  string role = 4;
+}
+
+message AuthRequest {
+  string email = 1;
+  string password = 2;
+}
+
+message AuthResponse {
+  string token = 1;
+  User user = 2;
+}
+
+message RegisterRequest {
+  string email = 1;
+  string password = 2;
+  string name = 3;
+}
+
+message UserProfileRequest {
+  string user_id = 1;
+}
+
+message UserProfileResponse {
+  User user = 1;
+}
+
+message OrderItem {
+  string menu_item_id = 1;
+  string name = 2;
+  int32 quantity = 3;
+  double price = 4;
+}
+
+message Order {
+  string id = 1;
+  string user_id = 2;
+  string restaurant_id = 3;
+  repeated OrderItem items = 4;
+  string status = 5;
+  double total = 6;
+  string created_at = 7;
+}
+
+message CreateOrderRequest {
+  string user_id = 1;
+  string restaurant_id = 2;
+  repeated OrderItem items = 3;
+}
+
+message UpdateOrderStatusRequest {
+  string order_id = 1;
+  string status = 2;
+}
+
+message GetOrderRequest {
+  string order_id = 1;
+}
+
+message ListUserOrdersRequest {
+  string user_id = 1;
+}
+
+message CancelOrderRequest {
+  string order_id = 1;
+}
+
+message OrderResponse {
+  Order order = 1;
+}
+
+message ListOrdersResponse {
+  repeated Order orders = 1;
+}
+
+message Payment {
+  string id = 1;
+  string order_id = 2;
+  string user_id = 3;
+  double amount = 4;
+  string status = 5;
+  string method = 6;
+  string created_at = 7;
+}
+
+message CreatePaymentRequest {
+  string order_id = 1;
+  string user_id = 2;
+  double amount = 3;
+  string method = 4;
+}
+
+message GetPaymentStatusRequest {
+  string payment_id = 1;
+}
+
+message PaymentResponse {
+  Payment payment = 1;
+}
+
+message DeliveryPerson {
+  string id = 1;
+  string name = 2;
+  string phone = 3;
+  string status = 4;
+}
+
+message Delivery {
+  string id = 1;
+  string order_id = 2;
+  string delivery_person_id = 3;
+  string status = 4;
+  string current_location = 5;
+  string assigned_at = 6;
+}
+
+message AssignDeliveryRequest {
+  string order_id = 1;
+  string delivery_person_id = 2;
+}
+
+message UpdateDeliveryLocationRequest {
+  string delivery_id = 1;
+  string location = 2;
+}
+
+message GetDeliveryStatusRequest {
+  string order_id = 1;
+}
+
+message ListDeliveriesRequest {
+  string delivery_person_id = 1;
+}
+
+message DeliveryResponse {
+  Delivery delivery = 1;
+}
+
+message ListDeliveriesResponse {
+  repeated Delivery deliveries = 1;
+}
+
+message OrderCreatedEvent {
+  string order_id = 1;
+  string user_id = 2;
+  double total = 3;
+}
+
+message PaymentProcessedEvent {
+  string payment_id = 1;
+  string order_id = 2;
+  string status = 3;
+}
+
+message DeliveryAssignedEvent {
+  string delivery_id = 1;
+  string order_id = 2;
+  string delivery_person_id = 3;
+}
+
+service AuthService {
+  rpc Register(RegisterRequest) returns (AuthResponse);
+  rpc Login(AuthRequest) returns (AuthResponse);
+  rpc GetProfile(UserProfileRequest) returns (UserProfileResponse);
+}
+
+service OrderService {
+  rpc CreateOrder(CreateOrderRequest) returns (OrderResponse);
+  rpc UpdateOrderStatus(UpdateOrderStatusRequest) returns (OrderResponse);
+  rpc GetOrder(GetOrderRequest) returns (OrderResponse);
+  rpc ListUserOrders(ListUserOrdersRequest) returns (ListOrdersResponse);
+  rpc CancelOrder(CancelOrderRequest) returns (OrderResponse);
+}
+
+service PaymentService {
+  rpc CreatePayment(CreatePaymentRequest) returns (PaymentResponse);
+  rpc GetPaymentStatus(GetPaymentStatusRequest) returns (PaymentResponse);
+}
+
+service DeliveryService {
+  rpc AssignDeliveryPerson(AssignDeliveryRequest) returns (DeliveryResponse);
+  rpc UpdateDeliveryLocation(UpdateDeliveryLocationRequest) returns (DeliveryResponse);
+  rpc GetDeliveryStatus(GetDeliveryStatusRequest) returns (DeliveryResponse);
+  rpc ListDeliveries(ListDeliveriesRequest) returns (ListDeliveriesResponse);
+}

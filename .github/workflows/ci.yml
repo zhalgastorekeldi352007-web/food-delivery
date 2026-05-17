@@ -1,0 +1,42 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_DB: food_delivery
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 10s --health-timeout 5s --health-retries 5
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.22'
+      - name: Install dependencies
+        run: go mod download
+      - name: Run unit tests
+        run: go test ./... -coverprofile=coverage.out
+      - name: Build services
+        run: |
+          go build -o /tmp/order ./cmd/order
+          go build -o /tmp/payment ./cmd/payment
+          go build -o /tmp/delivery ./cmd/delivery
+          go build -o /tmp/gateway ./cmd/gateway

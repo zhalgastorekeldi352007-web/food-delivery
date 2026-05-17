@@ -1,0 +1,112 @@
+version: '3.9'
+services:
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: food_delivery
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    ports:
+      - 5432:5432
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+  redis:
+    image: redis:7-alpine
+    ports:
+      - 6379:6379
+  nats:
+    image: nats:latest
+    ports:
+      - 4222:4222
+      - 8222:8222
+  jaeger:
+    image: jaegertracing/all-in-one:1.43
+    ports:
+      - 16686:16686
+      - 14268:14268
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - 9090:9090
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - 3000:3000
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    depends_on:
+      - prometheus
+  order:
+    build: .
+    command: ["/usr/local/bin/order"]
+    environment:
+      - ORDER_GRPC_PORT=50051
+      - ORDER_HTTP_PORT=8081
+      - ORDER_DB_URL=postgres://postgres:password@postgres:5432/food_delivery?sslmode=disable&search_path=order_service
+      - ORDER_REDIS_URL=redis://redis:6379
+      - ORDER_NATS_URL=nats://nats:4222
+      - ORDER_SMTP_HOST=smtp.gmail.com
+      - ORDER_SMTP_PORT=587
+      - ORDER_SMTP_USER=you@gmail.com
+      - ORDER_SMTP_PASS=yourpassword
+      - ORDER_JWT_SECRET=order-secret
+      - ORDER_PROM_PORT=9464
+    depends_on:
+      - postgres
+      - redis
+      - nats
+  payment:
+    build: .
+    command: ["/usr/local/bin/payment"]
+    environment:
+      - PAYMENT_GRPC_PORT=50052
+      - PAYMENT_HTTP_PORT=8082
+      - PAYMENT_DB_URL=postgres://postgres:password@postgres:5432/food_delivery?sslmode=disable&search_path=payment_service
+      - PAYMENT_NATS_URL=nats://nats:4222
+      - PAYMENT_SMTP_HOST=smtp.gmail.com
+      - PAYMENT_SMTP_PORT=587
+      - PAYMENT_SMTP_USER=you@gmail.com
+      - PAYMENT_SMTP_PASS=yourpassword
+      - PAYMENT_JWT_SECRET=payment-secret
+    depends_on:
+      - postgres
+      - nats
+  delivery:
+    build: .
+    command: ["/usr/local/bin/delivery"]
+    environment:
+      - DELIVERY_GRPC_PORT=50053
+      - DELIVERY_HTTP_PORT=8083
+      - DELIVERY_DB_URL=postgres://postgres:password@postgres:5432/food_delivery?sslmode=disable&search_path=delivery_service
+      - DELIVERY_NATS_URL=nats://nats:4222
+      - DELIVERY_SMTP_HOST=smtp.gmail.com
+      - DELIVERY_SMTP_PORT=587
+      - DELIVERY_SMTP_USER=you@gmail.com
+      - DELIVERY_SMTP_PASS=yourpassword
+      - DELIVERY_JWT_SECRET=delivery-secret
+    depends_on:
+      - postgres
+      - nats
+  gateway:
+    build: .
+    command: ["/usr/local/bin/gateway"]
+    ports:
+      - 8080:8080
+      - 50054:50054
+    environment:
+      - GATEWAY_GRPC_PORT=50054
+      - GATEWAY_HTTP_PORT=8080
+      - GATEWAY_DB_URL=postgres://postgres:password@postgres:5432/food_delivery?sslmode=disable&search_path=gateway_service
+      - GATEWAY_JWT_SECRET=gateway-secret
+      - ORDER_GRPC_HOST=order:50051
+      - PAYMENT_GRPC_HOST=payment:50052
+      - DELIVERY_GRPC_HOST=delivery:50053
+    depends_on:
+      - postgres
+      - order
+      - payment
+      - delivery
+volumes:
+  postgres-data:

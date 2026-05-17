@@ -1,0 +1,67 @@
+# Binaries
+/bin/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binary
+*.test
+
+# Output of the go coverage tool
+*.out
+coverage.html
+coverage.out
+
+# Dependency directories
+vendor/
+
+# Go workspace file
+go.work
+go.work.sum
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+logs/
+
+# Docker
+*.pid
+*.pid.lock
+
+# Temporary files
+tmp/
+temp/
+
+# Frontend
+node_modules/
+dist/
+build/
+*.local
+
+# OS files
+Thumbs.db
+Desktop.ini
+
+# Binary files
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Proto generated files (optional - can be regenerated)
+# proto/*.pb.go
+# proto/*_grpc.pb.go
